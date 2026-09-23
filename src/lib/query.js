@@ -154,17 +154,17 @@ export function monthlySeries() {
 
 // 指标 sparkline 数据
 export function sparkData(key, fin, prod) {
-  const f = fin.slice(-7)
-  const p = prod.slice(-7)
+  const f = (fin || []).slice(-7)
+  const p = (prod || []).slice(-7)
   switch (key) {
-    case 'mrr': return f.map((d) => Number((d.mrr / 1e4).toFixed(1)))
-    case 'arr': return f.map((d) => Number((d.arr / 1e4).toFixed(0)))
-    case 'nrr': return f.map((d) => d.nrr)
-    case 'churn_rate': return f.map((d) => d.churn_rate)
-    case 'new_customers': return f.map((d) => d.new_customers)
-    case 'dau': return p.map((d) => d.dau)
-    case 'd7_retention': return p.map((d) => d.d7_retention)
-    case 'stickiness': return p.map((d) => d.stickiness)
+    case 'mrr': return f.map((d) => Number(((d?.mrr ?? 0) / 1e4).toFixed(1)))
+    case 'arr': return f.map((d) => Number(((d?.arr ?? 0) / 1e4).toFixed(0)))
+    case 'nrr': return f.map((d) => Number((d?.nrr ?? 0).toFixed?.(1) ?? (d?.nrr ?? 0)))
+    case 'churn_rate': return f.map((d) => Number((d?.churn_rate ?? 0).toFixed?.(1) ?? (d?.churn_rate ?? 0)))
+    case 'new_customers': return f.map((d) => d?.new_customers ?? 0)
+    case 'dau': return p.map((d) => d?.dau ?? 0)
+    case 'd7_retention': return p.map((d) => d?.d7_retention ?? d?.retention?.d7 ?? 0)
+    case 'stickiness': return p.map((d) => d?.stickiness ?? 0)
     default: return []
   }
 }

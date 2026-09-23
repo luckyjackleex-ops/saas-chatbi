@@ -347,11 +347,11 @@ export const ATTRIBUTION_DIMS = [
 
 // 团队动态（模拟）
 export const ACTIVITY_FEED = [
-  { id: 'act-1', type: 'anomaly_detected', actor: { name: '王分析', role: '数据分析师', initials: '王' }, summary: '发现企业版客户流失率异常上升至 4.7%，已生成归因分析报告', reportId: 'mock-report-1', timestamp: '2026-05-25T08:30:00', relativeTime: '2 小时前' },
-  { id: 'act-2', type: 'report_generated', actor: { name: '张总', role: 'VP', initials: '张' }, summary: '生成了本周经营分析周报，MRR 环比增长 3.2%', reportId: 'mock-report-2', timestamp: '2026-05-24T15:30:00', relativeTime: '昨天 15:30' },
-  { id: 'act-3', type: 'analysis_completed', actor: { name: '李产品', role: '产品经理', initials: '李' }, summary: '完成了新注册流程 A/B 实验分析，D7 留存率提升 6.2pp', reportId: 'mock-report-3', timestamp: '2026-05-24T10:15:00', relativeTime: '昨天 10:15' },
-  { id: 'act-4', type: 'anomaly_detected', actor: { name: '王分析', role: '数据分析师', initials: '王' }, summary: '检测到 D7 留存率连续 2 周缓慢下降，建议产品关注', timestamp: '2026-05-23T14:00:00', relativeTime: '2 天前' },
-  { id: 'act-5', type: 'report_generated', actor: { name: '张总', role: 'VP', initials: '张' }, summary: '生成月度经营分析报告，NRR 整体健康但成都区域需关注', reportId: 'mock-report-4', timestamp: '2026-05-22T09:00:00', relativeTime: '3 天前' },
+  { id: 'act-1', type: 'anomaly_detected', actor: { name: '数据分析师', role: '数据分析师', initials: '分' }, summary: '发现企业版客户流失率异常上升至 4.7%，已生成归因分析报告', reportId: 'mock-report-1', timestamp: '2026-05-25T08:30:00', relativeTime: '2 小时前' },
+  { id: 'act-2', type: 'report_generated', actor: { name: '总经理', role: '管理者', initials: '总' }, summary: '生成了本周经营分析周报，MRR 环比增长 3.2%', reportId: 'mock-report-2', timestamp: '2026-05-24T15:30:00', relativeTime: '昨天 15:30' },
+  { id: 'act-3', type: 'analysis_completed', actor: { name: '产品经理', role: '产品经理', initials: '产' }, summary: '完成了新注册流程 A/B 实验分析，D7 留存率提升 6.2pp', reportId: 'mock-report-3', timestamp: '2026-05-24T10:15:00', relativeTime: '昨天 10:15' },
+  { id: 'act-4', type: 'anomaly_detected', actor: { name: '数据分析师', role: '数据分析师', initials: '分' }, summary: '检测到 D7 留存率连续 2 周缓慢下降，建议产品关注', timestamp: '2026-05-23T14:00:00', relativeTime: '2 天前' },
+  { id: 'act-5', type: 'report_generated', actor: { name: '总经理', role: '管理者', initials: '总' }, summary: '生成月度经营分析报告，NRR 整体健康但成都区域需关注', reportId: 'mock-report-4', timestamp: '2026-05-22T09:00:00', relativeTime: '3 天前' },
 ]
 
 export const ACTIVITY_STYLES = {

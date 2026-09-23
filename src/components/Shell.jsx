@@ -39,7 +39,7 @@ export function Sidebar({ collapsed, onToggle }) {
     logout()
     navigate('/login')
   }
-  const roleLabel = user?.role === 'manager' ? 'VP' : user?.role === 'pm' ? 'PM' : '分析师'
+  const roleLabel = user?.role === 'manager' ? '总经理' : user?.role === 'pm' ? '产品经理' : '数据分析师'
   return (
     <aside
       className="h-screen bg-zinc-950 border-r border-zinc-800 flex flex-col shrink-0 transition-all duration-200"

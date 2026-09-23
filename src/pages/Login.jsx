@@ -4,7 +4,7 @@ import { ChartColumn, MessageSquare, TrendingUp, Sparkles, FileText, ArrowRight,
 import { useAuth } from '../context/index.jsx'
 
 const DEMO_ACCOUNTS = [
-  { role: '管理员', user: 'manager', pwd: 'demo123' },
+  { role: '总经理', user: 'manager', pwd: 'demo123' },
   { role: '产品经理', user: 'pm', pwd: 'demo123' },
   { role: '数据分析师', user: 'analyst', pwd: 'demo123' },
 ]
@@ -12,8 +12,8 @@ const DEMO_ACCOUNTS = [
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('manager')
+  const [password, setPassword] = useState('demo123')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd] = useState(false)

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/index.jsx'
 import { Sidebar, Header } from './components/Shell.jsx'
 import { Walkthrough } from './components/Walkthrough.jsx'
+import { ErrorBoundary } from './components/ErrorBoundary.jsx'
 import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import ChatBI from './pages/ChatBI.jsx'
@@ -27,7 +28,11 @@ function AppLayout({ children }) {
       </div>
       <div className="app-main flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 bg-slate-50">{children}</main>
+        <main className="flex-1 bg-slate-50">
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </main>
       </div>
       <Walkthrough />
     </div>

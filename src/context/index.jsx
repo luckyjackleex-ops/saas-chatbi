@@ -1,15 +1,15 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 const USERS = {
-  manager: { password: 'demo123', role: 'manager', displayName: '张总 · VP' },
-  pm: { password: 'demo123', role: 'pm', displayName: '李产品 · 产品经理' },
-  analyst: { password: 'demo123', role: 'analyst', displayName: '王分析 · 数据分析师' },
+  manager: { password: 'demo123', role: 'manager', displayName: '总经理' },
+  pm: { password: 'demo123', role: 'pm', displayName: '产品经理' },
+  analyst: { password: 'demo123', role: 'analyst', displayName: '数据分析师' },
 }
 
 export const ROLES = [
-  { role: 'manager', displayName: '张总 · VP', initials: '张', label: '管理者视角' },
-  { role: 'pm', displayName: '李产品 · 产品经理', initials: '李', label: '产品经理视角' },
-  { role: 'analyst', displayName: '王分析 · 数据分析师', initials: '王', label: '数据分析师视角' },
+  { role: 'manager', displayName: '总经理', initials: '总', label: '管理者视角' },
+  { role: 'pm', displayName: '产品经理', initials: '产', label: '产品经理视角' },
+  { role: 'analyst', displayName: '数据分析师', initials: '分', label: '数据分析师视角' },
 ]
 
 const AuthContext = createContext(null)

@@ -3,7 +3,7 @@ import { parseQuery, streamInsight } from './llm.js'
 import { executeQuery, sparkData } from './query.js'
 import { readDrafts, writeDrafts, readLocal, writeLocal } from './store.js'
 import { WATCHLIST_METRICS, WATCHLIST_DEFAULTS } from './metrics.js'
-import { monthlyFinancial, monthlyProduct } from './data.js'
+import { monthlyFinancial, monthlyProduct, dailyFinancial, dailyProduct } from './data.js'
 
 const STEP_INTERVAL = 400
 
@@ -172,16 +172,47 @@ export function useDrafts(role) {
 }
 
 function watchlistValue(key, finLast, finPrev, prodLast, prodPrev) {
-  const finMap = { mrr: finLast.mrr, churn_rate: finLast.churn_rate, nrr: finLast.nrr, arr: finLast.arr, new_customers: finLast.new_customers }
-  const prodMap = { dau: prodLast.dau, d7_retention: prodLast.d7_retention, stickiness: prodLast.stickiness }
-  if (key in finMap) {
-    const prev = finPrev ? finMap[key] : finMap[key]
-    return { value: key === 'mrr' || key === 'arr' ? finMap[key] / 1e4 : finMap[key], prev: (key === 'mrr' || key === 'arr') && finPrev ? prev / 1e4 : prev }
+  const finMap = {
+    mrr: finLast?.mrr,
+    churn_rate: finLast?.churn_rate,
+    nrr: finLast?.nrr,
+    arr: finLast?.arr,
+    new_customers: finLast?.new_customers,
   }
-  if (key in prodMap) {
-    const prev = prodPrev ? prodMap[key] : prodMap[key]
-    return { value: prodMap[key], prev }
+  const finPrevMap = {
+    mrr: finPrev?.mrr,
+    churn_rate: finPrev?.churn_rate,
+    nrr: finPrev?.nrr,
+    arr: finPrev?.arr,
+    new_customers: finPrev?.new_customers,
   }
+  const prodMap = {
+    dau: prodLast?.dau,
+    d7_retention: prodLast?.d7_retention ?? prodLast?.retention?.d7,
+    stickiness: prodLast?.stickiness,
+  }
+  const prodPrevMap = {
+    dau: prodPrev?.dau,
+    d7_retention: prodPrev?.d7_retention ?? prodPrev?.retention?.d7,
+    stickiness: prodPrev?.stickiness,
+  }
+
+  if (key in finMap && finMap[key] != null) {
+    const cur = Number(finMap[key])
+    const prev = finPrevMap[key] != null ? Number(finPrevMap[key]) : cur
+    const isWan = key === 'mrr' || key === 'arr'
+    return {
+      value: isWan ? cur / 1e4 : cur,
+      prev: isWan ? prev / 1e4 : prev,
+    }
+  }
+
+  if (key in prodMap && prodMap[key] != null) {
+    const cur = Number(prodMap[key])
+    const prev = prodPrevMap[key] != null ? Number(prodPrevMap[key]) : cur
+    return { value: cur, prev }
+  }
+
   return null
 }
 
@@ -195,19 +226,30 @@ export function useWatchlist(activeRole) {
   const finPrev = fin.length > 1 ? fin[fin.length - 2] : null
   const prodLast = prod[prod.length - 1]
   const prodPrev = prod.length > 1 ? prod[prod.length - 2] : null
-  const dailyFin = useMemo(() => monthlyFinancial(), [])
-  const dailyProd = useMemo(() => monthlyProduct(), [])
+  const dailyFin = useMemo(() => dailyFinancial(), [])
+  const dailyProd = useMemo(() => dailyProduct(), [])
 
   const watchlistValues = useMemo(
     () =>
       watchedKeys.map((key) => {
         const meta = WATCHLIST_METRICS.find((m) => m.key === key)
         const v = watchlistValue(key, finLast, finPrev, prodLast, prodPrev)
-        if (!v)
+        if (!v || v.value == null || isNaN(v.value)) {
           return { key, label: meta?.label || key, value: 0, unit: meta?.unit || '', changePercent: 0, prevValue: 0, isAnomaly: false }
-        const pct = v.prev === 0 ? 0 : Number((((v.value - v.prev) / v.prev) * 100).toFixed(1))
-        const anomaly = (key === 'churn_rate' && v.value > 3.5) || (key === 'nrr' && v.value < 100)
-        return { key, label: meta?.label || key, value: Number(v.value.toFixed(1)), unit: meta?.unit || '', changePercent: pct, prevValue: Number(v.prev.toFixed(1)), isAnomaly: anomaly }
+        }
+        const val = Number(v.value)
+        const prevVal = (v.prev != null && !isNaN(v.prev)) ? Number(v.prev) : val
+        const pct = prevVal === 0 ? 0 : Number((((val - prevVal) / prevVal) * 100).toFixed(1))
+        const anomaly = (key === 'churn_rate' && val > 3.5) || (key === 'nrr' && val < 100)
+        return {
+          key,
+          label: meta?.label || key,
+          value: Number(val.toFixed(1)),
+          unit: meta?.unit || '',
+          changePercent: isNaN(pct) ? 0 : pct,
+          prevValue: Number(prevVal.toFixed(1)),
+          isAnomaly: anomaly,
+        }
       }),
     [watchedKeys, finLast, finPrev, prodLast, prodPrev],
   )

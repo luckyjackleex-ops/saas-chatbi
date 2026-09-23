@@ -32,13 +32,18 @@ import { WorldMap } from '../components/map.jsx'
 import { MetricDrawer, CityDrawer, MetricDictionary } from '../components/drawers.jsx'
 
 function pctChange(cur, prev) {
-  return prev === 0 ? 0 : Number((((cur - prev) / prev) * 100).toFixed(1))
+  if (cur == null || prev == null || isNaN(cur) || isNaN(prev) || Number(prev) === 0) return 0
+  const c = Number(cur)
+  const p = Number(prev)
+  return Number((((c - p) / p) * 100).toFixed(1))
 }
 
 function formatValue(key, value) {
-  if (key === 'mrr' || key === 'arr') return value.toFixed(1)
-  if (key === 'dau') return value.toLocaleString()
-  return String(value)
+  if (value == null || isNaN(value)) return '-'
+  const num = Number(value)
+  if (key === 'mrr' || key === 'arr') return num.toFixed(1)
+  if (key === 'dau') return Math.round(num).toLocaleString()
+  return String(num)
 }
 
 function MetricCard({ data, onAnalyze }) {
@@ -56,6 +61,8 @@ function MetricCard({ data, onAnalyze }) {
   const ChangeIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus
   const benchmark = BENCHMARK[data.key]
   const isLarge = data.isLarge ?? false
+  const cardSparkData = Array.isArray(data.sparkData) ? data.sparkData : []
+
   return (
     <div
       className={`bg-white rounded-xl border p-5 shadow-sm b2b-shadow-card hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-fade-in relative group/card ${
@@ -93,7 +100,7 @@ function MetricCard({ data, onAnalyze }) {
       )}
       <div className="flex items-baseline gap-1.5 mb-1">
         <span className={`tabular-nums font-bold text-slate-900 ${isLarge ? 'text-3xl' : 'text-2xl'}`}>
-          <CountUp value={data.value} duration={500} delay={(data.index ?? 0) * 80} format={(v) => formatValue(data.key, v)} />
+          <CountUp value={data.value ?? 0} duration={500} delay={(data.index ?? 0) * 80} format={(v) => formatValue(data.key, v)} />
         </span>
         <span className="text-xs text-slate-400">{data.unit}</span>
         {change !== 0 && (
@@ -108,8 +115,10 @@ function MetricCard({ data, onAnalyze }) {
       {benchmark && (
         <div className="flex items-center gap-2 mb-2 px-2 py-1 rounded text-[10px]">
           {(() => {
-            const better = benchmark.higherIsBetter ? data.value > benchmark.value : data.value < benchmark.value
-            const diff = benchmark.higherIsBetter ? ((data.value - benchmark.value) / benchmark.value) * 100 : ((benchmark.value - data.value) / benchmark.value) * 100
+            const val = typeof data.value === 'number' && !isNaN(data.value) ? data.value : 0
+            const bmVal = benchmark.value || 1
+            const better = benchmark.higherIsBetter ? val > bmVal : val < bmVal
+            const diff = benchmark.higherIsBetter ? ((val - bmVal) / bmVal) * 100 : ((bmVal - val) / bmVal) * 100
             return (
               <>
                 <span className="text-slate-400">{benchmark.label} {benchmark.value}{data.unit}</span>
@@ -121,9 +130,9 @@ function MetricCard({ data, onAnalyze }) {
           })()}
         </div>
       )}
-      {data.sparkData.length > 0 && (
+      {cardSparkData.length > 0 && (
         <div className={isLarge ? 'h-12 mb-1' : 'h-8 mb-1'}>
-          <ReactECharts option={sparklineOption(data.sparkData, meta.color, isLarge ? 48 : 32)} style={{ height: isLarge ? 48 : 32 }} notMerge lazyUpdate />
+          <ReactECharts option={sparklineOption(cardSparkData, meta.color, isLarge ? 48 : 32)} style={{ height: isLarge ? 48 : 32 }} notMerge lazyUpdate />
         </div>
       )}
       <button
@@ -173,7 +182,7 @@ function ActivityFeed() {
       const mine = drafts.slice(0, 3).map((d) => ({
         id: `draft-${d.id}`,
         type: 'report_generated',
-        actor: { name: d.role === 'manager' ? '张总' : d.role === 'pm' ? '李产品' : '王分析', role: d.role === 'manager' ? 'VP' : d.role === 'pm' ? '产品经理' : '数据分析师', initials: d.role === 'manager' ? '张' : d.role === 'pm' ? '李' : '王' },
+        actor: { name: d.role === 'manager' ? '总经理' : d.role === 'pm' ? '产品经理' : '数据分析师', role: d.role === 'manager' ? '管理者' : d.role === 'pm' ? '产品经理' : '数据分析师', initials: d.role === 'manager' ? '总' : d.role === 'pm' ? '产' : '分' },
         summary: `生成了报告「${d.title}」`,
         reportId: d.id,
         timestamp: d.createdAt,
@@ -297,7 +306,9 @@ export default function Dashboard() {
         return
       }
     } catch {}
-    const fallback = `昨日 MRR ${(snapshot.financial.mrr.value / 1e4).toFixed(1)} 万元，DAU ${snapshot.product.dau.value.toLocaleString()} 人`
+    const mrrVal = snapshot?.financial?.mrr?.value ?? 0
+    const dauVal = snapshot?.product?.dau?.value ?? 0
+    const fallback = `昨日 MRR ${(mrrVal / 1e4).toFixed(1)} 万元，DAU ${dauVal.toLocaleString()} 人`
     setHeadline(fallback)
     complete('你是 SaaS 数据分析助手，擅长用简洁中文概括经营数据。', summaryPrompt(snapshot, anomalies), 'deepseek-v4-flash')
       .then((text) => {
@@ -492,17 +503,17 @@ export default function Dashboard() {
     { key: 'd7_retention', label: 'D7 留存', value: selectedCityData.d7Retention, unit: '%', prev: Number((selectedCityData.d7Retention - 1.2).toFixed(1)), sparkData: Array.from({ length: 7 }, () => selectedCityData.d7Retention + (Math.random() - 0.5) * 2), color: '#10b981', index: 5 },
   ]
 
-  const summaryCards = watchlistValues.map((w, i) => ({
+  const summaryCards = (watchlistValues || []).map((w, i) => ({
     key: w.key,
     label: w.label,
-    value: w.value,
-    unit: w.unit,
-    prev: w.prevValue,
-    sparkData: watchSpark(w.key),
+    value: w.value ?? 0,
+    unit: w.unit ?? '',
+    prev: w.prevValue ?? 0,
+    sparkData: typeof watchSpark === 'function' ? (watchSpark(w.key) || []) : [],
     color: (METRIC_ICONS[w.key] || {}).color || '#64748b',
     isLarge: i === 0,
     index: i,
-    isAnomaly: w.isAnomaly,
+    isAnomaly: Boolean(w.isAnomaly),
   }))
 
   return (
@@ -758,7 +769,7 @@ export default function Dashboard() {
             <h3 className="text-xs font-semibold text-brand-800">今日经营摘要</h3>
             <span className="text-[10px] text-brand-400 ml-auto">{snapshot.date}</span>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">{headline || `昨日 MRR ${(snapshot.financial.mrr.value / 1e4).toFixed(1)} 万元，DAU ${snapshot.product.dau.value.toLocaleString()} 人`}</p>
+          <p className="text-xs text-slate-600 leading-relaxed">{headline || `昨日 MRR ${(((snapshot?.financial?.mrr?.value ?? 0) / 1e4)).toFixed(1)} 万元，DAU ${(snapshot?.product?.dau?.value ?? 0).toLocaleString()} 人`}</p>
         </div>
 
         <AiWorkStats anomalyCount={anomalies.length} />

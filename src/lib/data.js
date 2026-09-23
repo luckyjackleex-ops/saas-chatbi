@@ -119,6 +119,9 @@ export function monthlyProduct() {
       dau: c,
       mau: s,
       stickiness: l,
+      d7_retention: f,
+      d30_retention: m,
+      d1_retention: p,
       feature_usage: {
         项目管理: Math.round(s * (0.42 + t * 0.005 + n(5) * 0.08)),
         数据分析: Math.round(s * (0.28 + t * 0.008 + n(6) * 0.06)),

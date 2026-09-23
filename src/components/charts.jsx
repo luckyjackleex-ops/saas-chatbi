@@ -10,7 +10,7 @@ function easeOutCubic(x) {
 }
 
 function roundTo(value, target) {
-  if (target <= 0) return 0
+  if (typeof target !== 'number' || isNaN(target) || target <= 0) return 0
   if (target % 1 === 0) return Math.round(value)
   const digits = String(target).split('.')[1]?.length ?? 0
   const m = 10 ** digits
@@ -18,18 +18,19 @@ function roundTo(value, target) {
 }
 
 function useCountUp(target, duration = 500, delay = 0, enabled = true) {
+  const safeTarget = typeof target === 'number' && !isNaN(target) ? target : 0
   const [val, setVal] = useState(0)
   const raf = useRef(0)
   const timeout = useRef(0)
-  const prevTarget = useRef(target)
+  const prevTarget = useRef(safeTarget)
   const prevEnabled = useRef(enabled)
   useEffect(() => {
-    const changed = target !== prevTarget.current
+    const changed = safeTarget !== prevTarget.current
     const wasDisabled = !prevEnabled.current && enabled
-    prevTarget.current = target
+    prevTarget.current = safeTarget
     prevEnabled.current = enabled
     if (!enabled) {
-      setVal(target)
+      setVal(safeTarget)
       return
     }
     if (!changed && !wasDisabled) return
@@ -40,9 +41,9 @@ function useCountUp(target, duration = 500, delay = 0, enabled = true) {
       const frame = (ts) => {
         if (startTime === null) startTime = ts
         const p = Math.min((ts - startTime) / duration, 1)
-        setVal(target * easeOutCubic(p))
+        setVal(safeTarget * easeOutCubic(p))
         if (p < 1) raf.current = requestAnimationFrame(frame)
-        else setVal(target)
+        else setVal(safeTarget)
       }
       raf.current = requestAnimationFrame(frame)
     }
@@ -52,12 +53,13 @@ function useCountUp(target, duration = 500, delay = 0, enabled = true) {
       cancelAnimationFrame(raf.current)
       clearTimeout(timeout.current)
     }
-  }, [target, duration, delay, enabled])
-  return roundTo(Math.min(val, target), target)
+  }, [safeTarget, duration, delay, enabled])
+  return roundTo(Math.min(val, safeTarget), safeTarget)
 }
 
 export function CountUp({ value, duration = 500, delay = 0, enabled = true, format }) {
-  const v = useCountUp(value, duration, delay, enabled)
+  const numVal = typeof value === 'number' && !isNaN(value) ? value : 0
+  const v = useCountUp(numVal, duration, delay, enabled)
   return <>{format ? format(v) : String(v)}</>
 }
 
