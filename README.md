@@ -1,6 +1,6 @@
 # AI Analytics · SaaS ChatBI
 
-一个面向 SaaS 场景的 AI 数据分析（ChatBI）Demo 项目，100% 复刻自 [saas-chaibi.netlify.app](https://saas-chaibi.netlify.app/)。用自然语言提问，拿到从图表、洞察到建议和报告的完整分析结果，开箱即用并内置 SaaS 行业指标体系。
+一个面向 SaaS 场景的 AI 数据分析（ChatBI）Demo 项目，用自然语言提问，拿到从图表、洞察到建议和报告的完整分析结果，开箱即用并内置 SaaS 行业指标体系。
 
 ## 功能
 
